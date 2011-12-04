@@ -1759,7 +1759,8 @@
   <java-symbol type="integer" name="config_backKillTimeout" />
   <java-symbol type="bool" name="config_show_cmIMESwitcher"/>
   <java-symbol type="integer" name="config_wallpaperMaxWidth" />
-  
+  <java-symbol type="string" name="config_legacyUmsLunFile" />
+
   <!-- Notification and battery light -->
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
