@@ -2891,7 +2891,13 @@ public final class Settings {
          */
         public static final String STATUS_BAR_TRAFFIC = "status_bar_traffic";
 
-	/**
+       /**
+        * Status Bar notification icon opacity
+        * @hide
+        */
+        public static final String STATUS_BAR_NOTIF_ICON_OPACITY = "status_bar_notif_icon_opacity";
+
+	    /**
          * HALO enabled, should default to 0 (HALO is disabled)
          * @hide
          */
