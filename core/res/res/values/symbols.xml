@@ -1757,10 +1757,11 @@
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
   <java-symbol type="bool" name="config_hasRotationLockSwitch" />
   <java-symbol type="integer" name="config_backKillTimeout" />
+  <java-symbol type="bool" name="config_show_cmIMESwitcher"/>
   
   <!-- LED flashlight -->
   <java-symbol type="bool" name="config_enableTorch" />
-
+  
   <!-- Notification and battery light -->
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
