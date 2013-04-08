@@ -477,6 +477,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }});
 
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
+        mStatusBarView.setStatusBar(this);
         mStatusBarView.setBar(this);
         
 
@@ -516,6 +517,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
+                addNavigationBarCallback(mNavigationBarView);
                 if (mNavBarAutoHide) {
                     setupAutoHide();
                 }
@@ -795,6 +797,11 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public QuickSettingsContainerView getQuickSettingsPanel() {
+        return mSettingsContainer;
+    }
+
+    @Override
     protected WindowManager.LayoutParams getRecentsLayoutParams(LayoutParams layoutParams) {
         boolean opaque = false;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -848,6 +855,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void setImeShowStatus(boolean enabled) {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.PIE_SOFTKEYBOARD_IS_SHOWING,
+                enabled ? 1 : 0);
     }
 
     @Override
@@ -1624,12 +1634,28 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void showClock(boolean show) {
         if (mStatusBarView == null) return;
         ContentResolver resolver = mContext.getContentResolver();
+        boolean disableStatusBarInfo = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SPIE_DISABLE_STATUSBAR_INFO, 0) == 1;
+        if (disableStatusBarInfo) {
+            // call only the settings if statusbar info is really hidden
+            int pieMode = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SPIE_CONTROLS, 0);
+            boolean expandedDesktopState = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+
+            if (pieMode == 2
+                || pieMode == 1 && expandedDesktopState) {
+                show = false;
+            }
+        }
         View clock = mStatusBarView.findViewById(R.id.clock);
         View cclock = mStatusBarView.findViewById(R.id.center_clock);
         mShowClock = (Settings.System.getInt(resolver,
                 Settings.System.STATUS_BAR_CLOCK, 1) == 1);
-        boolean rightClock = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.STATUSBAR_CLOCK_STYLE, 0) == 0);
-        boolean centerClock = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.STATUSBAR_CLOCK_STYLE, 0) == 1);
+        boolean rightClock = (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUSBAR_CLOCK_STYLE, 0) == 0);
+        boolean centerClock = (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUSBAR_CLOCK_STYLE, 0) == 1);
         if (rightClock && clock != null) {
             clock.setVisibility(show ? (mShowClock ? View.VISIBLE : View.GONE) : View.GONE);
         }
@@ -1712,9 +1738,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                         | StatusBarManager.DISABLE_RECENT
                         | StatusBarManager.DISABLE_BACK
                         | StatusBarManager.DISABLE_SEARCH)) != 0) {
-            // the nav bar will take care of these
-            if (mNavigationBarView != null) 
-                mNavigationBarView.setDisabledFlags(state);
+
+            // all navigation bar listeners will take care of these
+            propagateDisabledFlags(state);
 
             if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
@@ -2456,9 +2482,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mNavigationIconHints = hints;
 
-        if (mNavigationBarView != null) {
-            mNavigationBarView.setNavigationIconHints(hints);
-        }
+        propagateNavigationIconHints(hints);
     }
 
     @Override // CommandQueue
@@ -2562,11 +2586,25 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void topAppWindowChanged(boolean showMenu) {
         mTransparencyManager.update();
+
+        if (mPieControlPanel != null)
+            mPieControlPanel.setMenu(showMenu);
+
         if (DEBUG) {
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
-        if (mNavigationBarView != null) {
-            mNavigationBarView.setMenuVisibility(showMenu);
+        propagateMenuVisibility(showMenu);
+
+        // hide pie triggers when keyguard is visible
+        try {
+            if (mWindowManagerService.isKeyguardLocked()
+                && (mDisabled & View.STATUS_BAR_DISABLE_HOME) != 0) {
+                keyguardTriggers(true);
+            } else {
+                keyguardTriggers(false);
+            }
+        } catch (RemoteException e) {
+            // nothing else to do ...
         }
 
         // See above re: lights-out policy for legacy apps.
@@ -3233,7 +3271,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             super(handler);
         }
 
-		void observe() {
+	void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NOTIFICATION_CLOCK[shortClick]), false, this);
@@ -3253,6 +3291,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.NAV_HIDE_ENABLE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_ICON_COLOR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SPIE_DISABLE_STATUSBAR_INFO), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SPIE_CONTROLS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STATE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ICON_COLOR_BEHAVIOR), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -3308,6 +3352,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
         mBrightnessControl = !autoBrightness && Settings.System.getInt(
                     cr, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
+        showClock(true);
 
         if (mNotificationData != null) {
             updateStatusBar();

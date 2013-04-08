@@ -58,7 +58,7 @@ import com.android.systemui.TransparencyManager;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.key.ExtensibleKeyButtonView;
 
-public class NavigationBarView extends LinearLayout {
+public class NavigationBarView extends LinearLayout implements BaseStatusBar.NavigationBarCallback  {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
 
@@ -524,6 +524,7 @@ public class NavigationBarView extends LinearLayout {
         }
     };
 
+    @Override
     public void setNavigationIconHints(int hints) {
         setNavigationIconHints(hints, false);
     }
@@ -555,6 +556,7 @@ public class NavigationBarView extends LinearLayout {
         updateMenuArrowKeys();
     }
 
+    @Override
     public void setDisabledFlags(int disabledFlags) {
         setDisabledFlags(disabledFlags, false);
     }
@@ -640,6 +642,7 @@ public class NavigationBarView extends LinearLayout {
         return mShowMenu;
     }
 
+    @Override
     public void setMenuVisibility(final boolean show) {
         setMenuVisibility(show, false);
     }

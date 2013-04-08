@@ -1438,7 +1438,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         return true;
     }
-    
+
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
@@ -1446,7 +1446,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mWindowCreated=" + mWindowCreated
                 + " mWindowVisible=" + mWindowVisible
                 + " mInputStarted=" + mInputStarted);
-        
+
         if (mInShowWindow) {
             Log.w(TAG, "Re-entrance in to showWindow");
             return;
@@ -1573,8 +1573,8 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = false;
         }
         //IME softkeyboard is hiding....toggle it
+        IStatusBarService statusbar = getStatusBarService();
         try {
-            IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
                 statusbar.setImeShowStatus(false);
             }

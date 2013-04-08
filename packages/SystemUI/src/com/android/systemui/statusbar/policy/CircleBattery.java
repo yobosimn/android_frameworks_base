@@ -115,6 +115,12 @@ public class CircleBattery extends ImageView {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CIRCLE_BATTERY_COLOR), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SPIE_DISABLE_STATUSBAR_INFO), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SPIE_CONTROLS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STATE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CIRCLE_BATTERY_TEXT_COLOR), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CIRCLE_BATTERY_ANIMATIONSPEED), false, this);
@@ -135,6 +141,21 @@ public class CircleBattery extends ImageView {
 
             batteryStyle = (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.STATUSBAR_BATTERY_ICON, 0));
+
+            boolean disableStatusBarInfo = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SPIE_DISABLE_STATUSBAR_INFO, 0) == 1;
+            if (disableStatusBarInfo) {
+                // call only the settings if statusbar info is really hidden
+                int pieMode = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SPIE_CONTROLS, 0);
+                boolean expandedDesktopState = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+
+                if (pieMode == 2
+                    || pieMode == 1 && expandedDesktopState) {
+                    mBatteryStyle = SbBatteryController.STYLE_HIDE;
+                }
+            }
 
             mCircleColor = (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.STATUS_BAR_CIRCLE_BATTERY_COLOR, res.getColor(R.color.holo_blue_dark)));
@@ -350,6 +371,7 @@ public class CircleBattery extends ImageView {
             drawCircle(canvas, mLevel, (mIsCharging ? mAnimOffset : 0), mTextLeftX, mRectLeft);
         }
     }
+
 
     /***
      * Initialize the Circle vars for start and observer
