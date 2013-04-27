@@ -1319,13 +1319,11 @@ status_t compileResourceFile(Bundle* bundle,
                         curIsFormatted = false;
                         // Untranslatable strings must only exist in the default [empty] locale
                         if (locale.size() > 0) {
-                            fprintf(stderr, "aapt: warning: string '%s' in %s marked untranslatable but exists"
+                            fprintf(stderr, "aapt: error: string '%s' in %s marked untranslatable but exists"
                                     " in locale '%s'\n", String8(name).string(),
                                     bundle->getResourceSourceDirs()[0],
                                     locale.string());
-                            if (errorOnWarning) {
-                                hasErrors = localHasErrors = true;
-                            }
+                            hasErrors = localHasErrors = true;
                         } else {
                             // Intentionally empty block:
                             //
@@ -2594,6 +2592,7 @@ ResourceTable::addLocalization(const String16& name, const String8& locale)
  * '-' indicates checks that will be implemented in the future.
  *
 <<<<<<< HEAD
+<<<<<<< HEAD
  * + A localized string for which no default-locale version exists => warning
  * + A string for which no version in an explicitly-requested locale exists => warning
  * + A localized translation of an translateable="false" string => warning
@@ -2602,6 +2601,11 @@ ResourceTable::addLocalization(const String16& name, const String8& locale)
  * + A string for which no version in an explicitly-requested locale exists => warning
  * + A localized translation of an translateable="false" string => warning or error
 >>>>>>> dc871c7... aapt: allow toggling "errors instead of warnings"
+=======
+ * + A localized string for which no default-locale version exists => error
+ * + A string for which no version in an explicitly-requested locale exists => warning
+ * + A localized translation of an translateable="false" string => error
+>>>>>>> e7c629d... aapt: localizations: be more aggressive
  * - A localized string not provided in every locale used by the table
  */
 status_t
@@ -2620,16 +2624,21 @@ ResourceTable::validateLocalizations(void)
         // Look for strings with no default localization
         if (configSet.count(defaultLocale) == 0) {
 <<<<<<< HEAD
+<<<<<<< HEAD
             fprintf(stdout, "aapt: warning: string '%s' has no default translation in %s; found:",
 =======
             fprintf(stderr, "aapt: warning: string '%s' has no default translation in %s; found:",
 >>>>>>> dc871c7... aapt: allow toggling "errors instead of warnings"
+=======
+            fprintf(stderr, "aapt: error: string '%s' has no default translation in %s; found:",
+>>>>>>> e7c629d... aapt: localizations: be more aggressive
                     String8(nameIter->first).string(), mBundle->getResourceSourceDirs()[0]);
             for (set<String8>::const_iterator locales = configSet.begin();
                  locales != configSet.end();
                  locales++) {
-                fprintf(stdout, " %s", (*locales).string());
+                fprintf(stderr, " %s", (*locales).string());
             }
+<<<<<<< HEAD
 <<<<<<< HEAD
             fprintf(stdout, "\n");
             // !!! TODO: throw an error here in some circumstances
@@ -2639,6 +2648,10 @@ ResourceTable::validateLocalizations(void)
                 err = BAD_VALUE;
             }
 >>>>>>> dc871c7... aapt: allow toggling "errors instead of warnings"
+=======
+            fprintf(stderr, "\n");
+            err = BAD_VALUE;
+>>>>>>> e7c629d... aapt: localizations: be more aggressive
         }
 
         // Check that all requested localizations are present for this string
