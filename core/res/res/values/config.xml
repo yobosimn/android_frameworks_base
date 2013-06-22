@@ -1276,4 +1276,6 @@
     <!-- Boolean to enable/disable SlimPIE default is enabled -->
     <bool name="config_slimPie">true</bool>
 
+    <!-- True if the Irda service should be started at system start -->
+    <bool name="config_enableIrdaManagerService">false</bool>
 </resources>
