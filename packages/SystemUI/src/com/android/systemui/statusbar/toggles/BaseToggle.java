@@ -38,6 +38,7 @@ public abstract class BaseToggle
     protected int mStyle;
 
     private boolean mCollapsePref;
+    private boolean mFloatingToggles;
     private Drawable mIconDrawable = null;
     private int mIconLevel = -1;
     private CharSequence mLabelText = null;
@@ -198,6 +199,9 @@ public abstract class BaseToggle
     }
 
     protected final void startActivity(Intent i) {
+        if (mFloatingToggles) {
+            i.addFlags(Intent.FLAG_FLOATING_WINDOW);
+        }
         collapseStatusBar();
         dismissKeyguard();
         mContext.startActivityAsUser(i, new UserHandle(UserHandle.USER_CURRENT));
@@ -297,6 +301,8 @@ public abstract class BaseToggle
             cr.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SHADE_COLLAPSE_ALL), false, this);
             cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.TOGGLES_FLOATING_WINDOW), false, this);
+            cr.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QUICK_SETTINGS_TEXT_COLOR), false, this);
 
             updateSettings();
@@ -313,6 +319,8 @@ public abstract class BaseToggle
 
         mCollapsePref = Settings.System.getBoolean(resolver,
                 Settings.System.SHADE_COLLAPSE_ALL, false);
+        mFloatingToggles = Settings.System.getBoolean(resolver,
+                Settings.System.TOGGLES_FLOATING_WINDOW, false);
         mTextColor = Settings.System.getInt(resolver,
                 Settings.System.QUICK_SETTINGS_TEXT_COLOR, 0xFFFFFFFF);
     }

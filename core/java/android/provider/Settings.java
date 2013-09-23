@@ -4442,6 +4442,13 @@ public final class Settings {
         public static final String SHADE_COLLAPSE_ALL = "shade_collapse_all";
 
         /**
+         * enable and disable launching toggles in a floating window
+         * 
+         * @hide
+         */
+        public static final String TOGGLES_FLOATING_WINDOW = "toggles_floating_window";
+
+        /**
          * enable and disable fast toggle in settings
          *
          * @hide
