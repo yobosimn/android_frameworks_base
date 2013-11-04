@@ -1782,6 +1782,9 @@
   <java-symbol type="drawable" name="ic_lock_profile" />
   <java-symbol type="drawable" name="ic_lock_expanded_desktop" />
 
+      <!-- LED flashlight -->
+  <java-symbol type="bool" name="config_enableTorch" />
+
   <!-- Profiles -->
   <java-symbol type="xml" name="profile_default" />
   <java-symbol type="string" name="wildcardProfile" />
@@ -1797,7 +1800,8 @@
   <!-- Developer settings - Kill app back press -->
   <java-symbol type="string" name="app_killed_message" />
 
-    <!-- LED flashlight -->
-  <java-symbol type="bool" name="config_enableTorch" />
+  <!-- HW rotation lock -->
+  <java-symbol type="string" name="toast_rotation_unlocked" />
+  <java-symbol type="string" name="toast_rotation_locked" />
 
 </resources>
