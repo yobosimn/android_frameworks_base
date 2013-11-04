@@ -1753,7 +1753,10 @@
    Resources added in version 10 of CyanogenMod
    =============================================================== -->
   <eat-comment />
-  
+
+  <!-- Reboot confirmation string -->
+  <java-symbol type="string" name="reboot_confirm" />
+
   <!-- Config.xml entries -->
   <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
   <java-symbol type="bool" name="config_hasRotationLockSwitch" />
